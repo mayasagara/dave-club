@@ -82,20 +82,101 @@
           }
         }
 
+        var SUPABASE_URL = "https://bodzlwbeslynaqxamgpp.supabase.co";
+        var SUPABASE_KEY = "sb_publishable_VWvuyM_-txwgj-jFTg_b6A_MB1yJI4y";
+        var PAGE_KEY = "notes";
         var ids = ["notes-col-1", "notes-col-2", "notes-col-3"];
-        ids.forEach(function (id, i) {
-          var key = "dave-notes-column-" + (i + 1);
+        var saveTimers = {};
+        var textareas = {};
+        var lastSaved = {};
+
+        function apiRequest(path, options) {
+          return fetch(SUPABASE_URL + path, Object.assign({
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: "Bearer " + SUPABASE_KEY,
+              "Content-Type": "application/json"
+            }
+          }, options || {}));
+        }
+
+        function parseError(response, fallbackMessage) {
+          return response.text().then(function (text) {
+            var detail = text;
+            try {
+              var parsed = JSON.parse(text);
+              detail = parsed.message || parsed.error_description || parsed.error || text;
+            } catch (e) {}
+            throw new Error(fallbackMessage + " (" + response.status + "): " + (detail || "Unknown error"));
+          });
+        }
+
+        function saveSlot(slot, value) {
+          var payload = [{ page: PAGE_KEY, slot: slot, content: value }];
+          return apiRequest("/rest/v1/page_notes?on_conflict=page,slot", {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: "Bearer " + SUPABASE_KEY,
+              "Content-Type": "application/json",
+              Prefer: "resolution=merge-duplicates,return=minimal"
+            },
+            body: JSON.stringify(payload)
+          }).then(function (response) {
+            if (!response.ok) return parseError(response, "Failed to save notes");
+            lastSaved[slot] = value;
+          }).catch(function (error) {
+            console.error(error && error.message ? error.message : error);
+          });
+        }
+
+        function queueSave(slot, value) {
+          if (saveTimers[slot]) {
+            clearTimeout(saveTimers[slot]);
+          }
+          saveTimers[slot] = setTimeout(function () {
+            saveSlot(slot, value);
+          }, 350);
+        }
+
+        function loadNotes() {
+          return apiRequest("/rest/v1/page_notes?page=eq." + encodeURIComponent(PAGE_KEY) + "&select=slot,content", {
+            method: "GET"
+          }).then(function (response) {
+            if (!response.ok) return parseError(response, "Failed to load notes");
+            return response.json();
+          }).then(function (rows) {
+            var bySlot = {};
+            (rows || []).forEach(function (row) {
+              bySlot[row.slot] = row.content || "";
+            });
+            ids.forEach(function (id) {
+              var ta = textareas[id];
+              if (!ta) return;
+              var next = bySlot[id] || "";
+              if (document.activeElement !== ta && ta.value !== next) {
+                ta.value = next;
+              }
+              lastSaved[id] = next;
+            });
+          }).catch(function (error) {
+            console.error(error && error.message ? error.message : error);
+          });
+        }
+
+        ids.forEach(function (id) {
           var ta = document.getElementById(id);
           if (!ta) return;
-          try {
-            ta.value = localStorage.getItem(key) || "";
-          } catch (e) {}
+          textareas[id] = ta;
           ta.addEventListener("input", function () {
-            try {
-              localStorage.setItem(key, ta.value);
-            } catch (e) {}
+            var value = ta.value;
+            if (lastSaved[id] === value) return;
+            queueSave(id, value);
           });
         });
+
+        loadNotes();
+        setInterval(loadNotes, 10000);
       })();
     </script>
   </body>
