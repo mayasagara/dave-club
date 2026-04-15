@@ -230,9 +230,18 @@
               updateVotes(item.id, -1);
             });
 
+            var remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "vote-btn";
+            remove.textContent = "Remove";
+            remove.addEventListener("click", function () {
+              removeProposal(item.id, item.title);
+            });
+
             meta.appendChild(count);
             meta.appendChild(up);
             meta.appendChild(down);
+            meta.appendChild(remove);
             li.appendChild(text);
             li.appendChild(meta);
             list.appendChild(li);
@@ -245,6 +254,25 @@
           var nextVotes = item.votes + delta;
           saveVotes(id, nextVotes < 0 ? 0 : nextVotes).catch(function (error) {
             renderError(error && error.message ? error.message : "Could not save vote change.");
+          });
+        }
+
+        function removeProposal(id, title) {
+          var ok = window.confirm('Delete "' + title + '"?');
+          if (!ok) return;
+
+          apiRequest("/rest/v1/proposals?id=eq." + encodeURIComponent(id), {
+            method: "DELETE",
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: "Bearer " + SUPABASE_KEY,
+              Prefer: "return=minimal"
+            }
+          }).then(function (response) {
+            if (!response.ok) return parseError(response, "Failed to delete proposal");
+            return loadProposals();
+          }).catch(function (error) {
+            renderError(error && error.message ? error.message : "Could not delete proposal.");
           });
         }
 
