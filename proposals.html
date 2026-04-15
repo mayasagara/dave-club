@@ -102,6 +102,19 @@
           }, options || {}));
         }
 
+        function parseError(response, fallbackMessage) {
+          return response.text().then(function (text) {
+            var detail = text;
+            try {
+              var parsed = JSON.parse(text);
+              detail = parsed.message || parsed.error_description || parsed.error || text;
+            } catch (e) {
+              // Keep raw text when response is not JSON.
+            }
+            throw new Error(fallbackMessage + " (" + response.status + "): " + (detail || "Unknown error"));
+          });
+        }
+
         function renderError(message) {
           list.innerHTML = "";
           var error = document.createElement("li");
@@ -114,13 +127,13 @@
           return apiRequest("/rest/v1/proposals?select=id,title,author,votes,created_at&order=votes.desc,created_at.asc", {
             method: "GET"
           }).then(function (response) {
-            if (!response.ok) throw new Error("Failed to load proposals.");
+            if (!response.ok) return parseError(response, "Failed to load proposals");
             return response.json();
           }).then(function (items) {
             proposals = Array.isArray(items) ? items : [];
             render();
-          }).catch(function () {
-            renderError("Could not load proposals. Check your internet or database setup.");
+          }).catch(function (error) {
+            renderError(error && error.message ? error.message : "Could not load proposals.");
           });
         }
 
@@ -135,7 +148,7 @@
             },
             body: JSON.stringify([{ title: title, author: author, votes: 0 }])
           }).then(function (response) {
-            if (!response.ok) throw new Error("Failed to save proposal.");
+            if (!response.ok) return parseError(response, "Failed to save proposal");
             return response.json();
           }).then(function () {
             return loadProposals();
@@ -153,7 +166,7 @@
             },
             body: JSON.stringify({ votes: votes })
           }).then(function (response) {
-            if (!response.ok) throw new Error("Failed to update votes.");
+            if (!response.ok) return parseError(response, "Failed to update votes");
             return loadProposals();
           });
         }
@@ -230,8 +243,8 @@
           var item = findProposal(id);
           if (!item) return;
           var nextVotes = item.votes + delta;
-          saveVotes(id, nextVotes < 0 ? 0 : nextVotes).catch(function () {
-            renderError("Could not save vote change. Please try again.");
+          saveVotes(id, nextVotes < 0 ? 0 : nextVotes).catch(function (error) {
+            renderError(error && error.message ? error.message : "Could not save vote change.");
           });
         }
 
@@ -244,8 +257,8 @@
           addProposal(title, author).then(function () {
             form.reset();
             titleInput.focus();
-          }).catch(function () {
-            renderError("Could not save proposal. Please try again.");
+          }).catch(function (error) {
+            renderError(error && error.message ? error.message : "Could not save proposal.");
           });
         });
 
