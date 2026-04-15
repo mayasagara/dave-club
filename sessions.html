@@ -176,7 +176,11 @@
         });
 
         loadNotes();
-        setInterval(loadNotes, 10000);
+        setInterval(loadNotes, 5000);
+        window.addEventListener("focus", loadNotes);
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden) loadNotes();
+        });
       })();
     </script>
   </body>

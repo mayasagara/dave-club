@@ -291,7 +291,11 @@
         });
 
         loadProposals();
-        setInterval(loadProposals, 10000);
+        setInterval(loadProposals, 5000);
+        window.addEventListener("focus", loadProposals);
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden) loadProposals();
+        });
       })();
     </script>
   </body>
