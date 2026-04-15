@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dave - Bookshelf</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="poster">
+      <header class="poster-head">
+        <div class="poster-head__title-line">
+          <h1 class="poster-title">dave</h1>
+          <div class="poster-head__actions">
+            <button
+              class="poster-menu-btn"
+              type="button"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-controls="site-menu"
+            >
+              &#9776;
+            </button>
+          </div>
+        </div>
+        <nav class="poster-menu" id="site-menu" aria-label="Main menu">
+          <button class="poster-menu-close-btn" type="button" aria-label="Close menu">&times;</button>
+          <a href="home.html" class="poster-menu__item">Home</a>
+          <a href="index.html" class="poster-menu__item">News</a>
+          <a href="sessions.html" class="poster-menu__item">Sessions</a>
+          <a href="notes.html" class="poster-menu__item">Notes</a>
+          <a href="proposals.html" class="poster-menu__item">Proposals</a>
+          <a href="bookshelf.html" class="poster-menu__item is-active" aria-current="page">Bookshelf</a>
+        </nav>
+      </header>
+
+      <main class="bookshelf-page" aria-label="Bookshelf covers">
+        <section class="bookshelf-lane">
+          <h2 class="bookshelf-lane__title">Reading</h2>
+          <ul class="bookshelf-strip" id="bookshelf-reading"></ul>
+        </section>
+
+        <section class="bookshelf-lane">
+          <h2 class="bookshelf-lane__title">Proposed</h2>
+          <ul class="bookshelf-strip" id="bookshelf-proposed"></ul>
+        </section>
+
+        <section class="bookshelf-lane">
+          <h2 class="bookshelf-lane__title">Read</h2>
+          <ul class="bookshelf-strip" id="bookshelf-read"></ul>
+        </section>
+      </main>
+    </div>
+    <script>
+      (function () {
+        var menuBtn = document.querySelector(".poster-menu-btn");
+        var menu = document.getElementById("site-menu");
+        var menuCloseBtn = menu ? menu.querySelector(".poster-menu-close-btn") : null;
+        if (menuBtn && menu) {
+          function closeMenu() {
+            menu.classList.remove("is-open");
+            menuBtn.setAttribute("aria-expanded", "false");
+          }
+
+          menuBtn.addEventListener("click", function () {
+            var willOpen = !menu.classList.contains("is-open");
+            menu.classList.toggle("is-open", willOpen);
+            menuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+          });
+
+          document.addEventListener("click", function (event) {
+            if (!menu.contains(event.target) && !menuBtn.contains(event.target)) {
+              closeMenu();
+            }
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") closeMenu();
+          });
+
+          if (menuCloseBtn) {
+            menuCloseBtn.addEventListener("click", closeMenu);
+          }
+        }
+
+        var readingEl = document.getElementById("bookshelf-reading");
+        var proposedEl = document.getElementById("bookshelf-proposed");
+        var readEl = document.getElementById("bookshelf-read");
+        var readingSeed = [
+          {
+            title: "yet to come",
+            author: "",
+            tone: "d",
+            placeholder: true
+          }
+        ];
+        var featuredBooks = [
+          {
+            title: "Mythologies",
+            author: "Roland Barthes",
+            cover: "books/read/9782021034479-fr.jpg"
+          },
+          {
+            title: "Une chambre a soi",
+            author: "Virginia Woolf",
+            cover: "books/read/71MQI9QP21L._UF1000,1000_QL80_.jpg"
+          },
+          {
+            title: "L'amant",
+            author: "Marguerite Duras",
+            cover: "books/read/816J5uJcXQL._AC_UF1000,1000_QL80_.jpg"
+          }
+        ];
+        var extraReadCovers = [
+          "books/read/04c1b07b1688d69a296086ed876a2c1d.jpg",
+          "books/read/5c0c97d55f1f8d17dba2d3edde7d00e9.jpg",
+          "books/read/8d2bfb92e15aa64903f6d1f06e264fb4.jpg",
+          "books/read/884b0181884e1cae20b0b5412f2966ff.jpg",
+          "books/read/5274705b4ae5fb88fe27c41ce8c58e9b.jpg",
+          "books/read/d56183dd3e2686ab618eafbfe86d2332.jpg",
+          "books/read/e8376a9d4f59df61bc31f4967bc07f0e.jpg",
+          "books/read/f41d0958a7c710740091e8a5bc5cd341.jpg"
+        ];
+
+        function makeBook(book, idx) {
+          var li = document.createElement("li");
+          li.className = "shelf-book";
+
+          var cover = document.createElement("div");
+          cover.className = "shelf-book__cover shelf-book__cover--" + (book.tone || ["a", "b", "c", "d", "e", "f"][idx % 6]);
+          if (book.placeholder) {
+            cover.classList.add("shelf-book__cover--placeholder");
+          }
+
+          if (book.cover) {
+            var image = document.createElement("img");
+            image.className = "shelf-book__image";
+            image.src = book.cover;
+            image.alt = "Cover of " + (book.title || "Untitled");
+            cover.appendChild(image);
+            li.appendChild(cover);
+            return li;
+          }
+
+          var title = document.createElement("span");
+          title.className = "shelf-book__title";
+          title.textContent = book.title || "Untitled";
+
+          var author = document.createElement("span");
+          author.className = "shelf-book__author";
+          author.textContent = book.author || "Unknown";
+
+          cover.appendChild(title);
+          cover.appendChild(author);
+          li.appendChild(cover);
+          return li;
+        }
+
+        function renderLane(target, items) {
+          target.innerHTML = "";
+          items.forEach(function (book, idx) {
+            target.appendChild(makeBook(book, idx));
+          });
+        }
+
+        var proposedCovers = [
+          "books/proposed/095f6e493886b20f1bcd639215f0ec23.jpg",
+          "books/proposed/1684f6ac3138fe5eeb678b3d9dacd0b2.jpg",
+          "books/proposed/32072f1364472eea42a703a9feccb641.jpg",
+          "books/proposed/5194e917ea369027d9b35060dd48e8bd.jpg",
+          "books/proposed/5a1a805e8d9487cb2e87ff9b713c315f.jpg",
+          "books/proposed/64e9350b99ceeb06aea7caac4319f9b6.jpg",
+          "books/proposed/6aa6ba89164cffd0e5e1144b7224f499.jpg",
+          "books/proposed/6e570d1d09a8254431ae5a244c70cb62.jpg",
+          "books/proposed/716cfa3c5b17a18c83a5ee77eb536b69.jpg",
+          "books/proposed/a81125cacfd59651bd74246a6b5c45ed.jpg",
+          "books/proposed/b05286f2a7d6cf34042732fa2e1645dd.jpg",
+          "books/proposed/b5657c5fd43cfbc6d09d91f7d24409f8.jpg",
+          "books/proposed/d0e51e11a81459c1d3afd8e0fee23e8e.jpg",
+          "books/proposed/d9ef0d3700b9d56673a5239498026fa8.jpg",
+          "books/proposed/e4ff40b5265708f74653a9a86ac805f2.jpg",
+          "books/proposed/fea4becbf3dc87e42fa8231368546576.jpg"
+        ];
+        var proposedBooks = proposedCovers.map(function (coverPath, idx) {
+          return {
+            title: "Proposed Book " + (idx + 1),
+            author: "",
+            cover: coverPath
+          };
+        });
+        var readBooks = featuredBooks.concat(
+          extraReadCovers.map(function (coverPath, idx) {
+            return {
+              title: "Read Book " + (idx + 4),
+              author: "",
+              cover: coverPath
+            };
+          })
+        );
+
+        renderLane(readingEl, readingSeed);
+        renderLane(proposedEl, proposedBooks);
+        renderLane(readEl, readBooks);
+      })();
+    </script>
+  </body>
+</html>

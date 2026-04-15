@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dave - Home</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="poster">
+      <header class="poster-head">
+        <div class="poster-head__title-line">
+          <h1 class="poster-title">dave</h1>
+          <div class="poster-head__actions">
+            <button
+              class="poster-menu-btn"
+              type="button"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-controls="site-menu"
+            >
+              &#9776;
+            </button>
+          </div>
+        </div>
+        <nav class="poster-menu" id="site-menu" aria-label="Main menu">
+          <button class="poster-menu-close-btn" type="button" aria-label="Close menu">&times;</button>
+          <a href="home.html" class="poster-menu__item is-active" aria-current="page">Home</a>
+          <a href="index.html" class="poster-menu__item">News</a>
+          <a href="sessions.html" class="poster-menu__item">Sessions</a>
+          <a href="notes.html" class="poster-menu__item">Notes</a>
+          <a href="proposals.html" class="poster-menu__item">Proposals</a>
+          <a href="bookshelf.html" class="poster-menu__item">Bookshelf</a>
+        </nav>
+      </header>
+
+      <main class="home-main" aria-label="Home background image slideshow">
+        <div class="home-slideshow" aria-hidden="true">
+          <div class="home-slide is-active"></div>
+          <div class="home-slide"></div>
+        </div>
+      </main>
+    </div>
+    <script>
+      (function () {
+        var menuBtn = document.querySelector(".poster-menu-btn");
+        var menu = document.getElementById("site-menu");
+        var menuCloseBtn = menu ? menu.querySelector(".poster-menu-close-btn") : null;
+        if (menuBtn && menu) {
+          function closeMenu() {
+            menu.classList.remove("is-open");
+            menuBtn.setAttribute("aria-expanded", "false");
+          }
+
+          menuBtn.addEventListener("click", function () {
+            var willOpen = !menu.classList.contains("is-open");
+            menu.classList.toggle("is-open", willOpen);
+            menuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+          });
+
+          document.addEventListener("click", function (event) {
+            if (!menu.contains(event.target) && !menuBtn.contains(event.target)) {
+              closeMenu();
+            }
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") closeMenu();
+          });
+
+          if (menuCloseBtn) {
+            menuCloseBtn.addEventListener("click", closeMenu);
+          }
+        }
+
+        var slides = document.querySelectorAll(".home-slide");
+        if (slides.length === 2) {
+          var homeImages = [
+            "home images/image-w1280.jpg",
+            "home images/1a72f05de20df488e382a87a858e6f29.jpg",
+            "home images/1b2f3e7fc5bb187b78874c30bb14c6b0.jpg",
+            "home images/1d3e5ea14bd1ab83f1ab6277bea95235.jpg",
+            "home images/2b1f4f88c6b6767e954f614443ead933.jpg",
+            "home images/6a5b1729ab508ac52b9386b4eb903d28.jpg",
+            "home images/8d0d8be2fc5f4468c2eff803d8a5e8af.jpg",
+            "home images/31fb6493b5808b0ec7b093d60d2478be.jpg",
+            "home images/40ac7621dd0b8d2613859e1c64ec0d3a.jpg",
+            "home images/93edc49c7c4220a594a6250ac16d1dbd.jpg",
+            "home images/885ef626a547801b3e933ef6d3c8e9cc.jpg",
+            "home images/3860b22158cd8a27507c54679b34795a.jpg",
+            "home images/5643d18fb549a0545e9694cebb5e9d12.jpg",
+            "home images/8290cdf634311bbd3ede22a2d4b37555.jpg",
+            "home images/0534543d71ad43f7e509cc9170956156.jpg",
+            "home images/594365cc136128f58f5fceca7bbc65f9.jpg",
+            "home images/a5c2393993a35d5faf5d34e2be5d5dc9.jpg",
+            "home images/aa9f80bc25993b37fbf3ac572fd161d9.jpg",
+            "home images/b2ce5caec500cf2a1dde78a41079442f.jpg",
+            "home images/c9ff9992a1a1ba21c7ab5c1ed3d985d5.jpg",
+            "home images/cdf54da5f45ed71569043c25375691c2.jpg",
+            "home images/ce6dfa3f25089efe179a17b0b331ea62.jpg",
+            "home images/d978196b09230020c5b454bce6ba6234.jpg",
+            "home images/dac0d241bcbf2c5642f5b708dd1b086f.jpg",
+            "home images/dd343e384cf48ad7085e46292c641624.jpg",
+            "home images/f74d140acccc1065c55f43396e61fa50.jpg"
+          ];
+
+          var activeIndex = 0;
+          var imageIndex = 0;
+          slides[activeIndex].style.backgroundImage = 'url("' + homeImages[imageIndex] + '")';
+
+          setInterval(function () {
+            imageIndex = (imageIndex + 1) % homeImages.length;
+            var nextIndex = activeIndex === 0 ? 1 : 0;
+            slides[nextIndex].style.backgroundImage = 'url("' + homeImages[imageIndex] + '")';
+            slides[nextIndex].classList.add("is-active");
+            slides[activeIndex].classList.remove("is-active");
+            activeIndex = nextIndex;
+          }, 4500);
+        }
+
+      })();
+    </script>
+  </body>
+</html>

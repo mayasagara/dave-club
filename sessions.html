@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dave - Sessions</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="poster">
+      <header class="poster-head">
+        <div class="poster-head__title-line">
+          <h1 class="poster-title">dave</h1>
+          <div class="poster-head__actions">
+            <button
+              class="poster-menu-btn"
+              type="button"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-controls="site-menu"
+            >
+              &#9776;
+            </button>
+          </div>
+        </div>
+        <nav class="poster-menu" id="site-menu" aria-label="Main menu">
+          <button class="poster-menu-close-btn" type="button" aria-label="Close menu">&times;</button>
+          <a href="home.html" class="poster-menu__item">Home</a>
+          <a href="index.html" class="poster-menu__item">News</a>
+          <a href="sessions.html" class="poster-menu__item is-active" aria-current="page">Sessions</a>
+          <a href="notes.html" class="poster-menu__item">Notes</a>
+          <a href="proposals.html" class="poster-menu__item">Proposals</a>
+          <a href="bookshelf.html" class="poster-menu__item">Bookshelf</a>
+        </nav>
+      </header>
+
+      <section class="poster-write" aria-label="Session planning columns">
+        <div class="poster-write-cell">
+          <label class="poster-write-label" for="session-col-1">Agenda</label>
+          <textarea id="session-col-1" class="poster-textarea" rows="12"></textarea>
+        </div>
+        <div class="poster-write-cell">
+          <label class="poster-write-label" for="session-col-2">Quotes</label>
+          <textarea id="session-col-2" class="poster-textarea" rows="12"></textarea>
+        </div>
+        <div class="poster-write-cell">
+          <label class="poster-write-label" for="session-col-3">Decisions</label>
+          <textarea id="session-col-3" class="poster-textarea" rows="12"></textarea>
+        </div>
+      </section>
+
+    </div>
+    <script>
+      (function () {
+        var menuBtn = document.querySelector(".poster-menu-btn");
+        var menu = document.getElementById("site-menu");
+        var menuCloseBtn = menu ? menu.querySelector(".poster-menu-close-btn") : null;
+        if (menuBtn && menu) {
+          function closeMenu() {
+            menu.classList.remove("is-open");
+            menuBtn.setAttribute("aria-expanded", "false");
+          }
+
+          menuBtn.addEventListener("click", function () {
+            var willOpen = !menu.classList.contains("is-open");
+            menu.classList.toggle("is-open", willOpen);
+            menuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+          });
+
+          document.addEventListener("click", function (event) {
+            if (!menu.contains(event.target) && !menuBtn.contains(event.target)) {
+              closeMenu();
+            }
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") closeMenu();
+          });
+
+          if (menuCloseBtn) {
+            menuCloseBtn.addEventListener("click", closeMenu);
+          }
+        }
+
+        var ids = ["session-col-1", "session-col-2", "session-col-3"];
+        ids.forEach(function (id, i) {
+          var key = "dave-sessions-column-" + (i + 1);
+          var ta = document.getElementById(id);
+          if (!ta) return;
+          try {
+            ta.value = localStorage.getItem(key) || "";
+          } catch (e) {}
+          ta.addEventListener("input", function () {
+            try {
+              localStorage.setItem(key, ta.value);
+            } catch (e) {}
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

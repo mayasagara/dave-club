@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dave - News & Info</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="poster">
+      <header class="poster-head">
+        <div class="poster-head__title-line">
+          <h1 class="poster-title">dave</h1>
+          <div class="poster-head__actions">
+            <button
+              class="poster-menu-btn"
+              type="button"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-controls="site-menu"
+            >
+              &#9776;
+            </button>
+          </div>
+        </div>
+        <nav class="poster-menu" id="site-menu" aria-label="Main menu">
+          <button class="poster-menu-close-btn" type="button" aria-label="Close menu">&times;</button>
+          <a href="home.html" class="poster-menu__item">Home</a>
+          <a href="index.html" class="poster-menu__item is-active" aria-current="page">News</a>
+          <a href="sessions.html" class="poster-menu__item">Sessions</a>
+          <a href="notes.html" class="poster-menu__item">Notes</a>
+          <a href="proposals.html" class="poster-menu__item">Proposals</a>
+          <a href="bookshelf.html" class="poster-menu__item">Bookshelf</a>
+        </nav>
+      </header>
+
+      <section class="overview-board" aria-label="News and infos">
+        <article class="overview-news">
+          <h2 class="overview-heading">News</h2>
+          <div class="overview-list">
+            <article class="overview-item overview-item--feature">
+              <p class="overview-item__meta">Book spotlight</p>
+              <p class="overview-item__title">Promise at Dawn by Romain Gary (published in 1960)</p>
+              <div class="open-book" aria-label="Open book layout">
+                <div class="open-book__page open-book__page--left">
+                  <img
+                    class="open-book__image"
+                    src="promiseatdawnbyromaingary.jpg"
+                    alt="Promise at Dawn by Romain Gary book cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="open-book__page open-book__page--right">
+                  <p class="open-book__text">Promise at Dawn by Romain Gary is an autobiographical novel that recounts the author’s childhood and youth under the powerful influence of his mother, a fiercely ambitious woman who is determined that her son will achieve greatness. Following their life from Eastern Europe to France, the narrative traces his development into a writer and war hero, particularly during his service as a pilot in World War II. Both humorous and deeply moving, the novel is a tribute to maternal love and its lasting impact on a man’s identity and destiny.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </article>
+
+        <aside class="overview-info">
+          <h2 class="overview-heading">Info</h2>
+          <dl class="overview-info-grid">
+            <div class="overview-info-row">
+              <dt>Current focus</dt>
+              <dd>Reading curation, session planning, proposal review, and weekly newsletter publishing</dd>
+            </div>
+            <div class="overview-info-row">
+              <dt>Contact</dt>
+              <dd>Use the Notes page for internal updates and publishing requests. For proposals, use the Proposals page.</dd>
+            </div>
+            <div class="overview-info-row">
+              <dt>Last updated</dt>
+              <dd>Updated this week.</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="newsletter-board" aria-label="Newsletter signup">
+        <h2 class="overview-heading">Newsletter & Book Discovery</h2>
+        <p class="newsletter-copy">
+          Get weekly updates with the latest news, session reminders, key info, and new book discoveries.
+        </p>
+        <form
+          class="newsletter-form"
+          id="newsletter-form"
+          action="https://formspree.io/f/mojyjepz"
+          method="POST"
+        >
+          <label class="newsletter-label" for="newsletter-email">Email</label>
+          <input
+            class="newsletter-input"
+            id="newsletter-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+          />
+          <input type="hidden" name="_subject" value="New newsletter signup" />
+          <button class="newsletter-btn" type="submit">Subscribe</button>
+          <p class="newsletter-status" id="newsletter-status" aria-live="polite"></p>
+        </form>
+      </section>
+
+    </div>
+    <script>
+      (function () {
+        var menuBtn = document.querySelector(".poster-menu-btn");
+        var menu = document.getElementById("site-menu");
+        var menuCloseBtn = menu ? menu.querySelector(".poster-menu-close-btn") : null;
+        if (menuBtn && menu) {
+          function closeMenu() {
+            menu.classList.remove("is-open");
+            menuBtn.setAttribute("aria-expanded", "false");
+          }
+
+          menuBtn.addEventListener("click", function () {
+            var willOpen = !menu.classList.contains("is-open");
+            menu.classList.toggle("is-open", willOpen);
+            menuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+          });
+
+          document.addEventListener("click", function (event) {
+            if (!menu.contains(event.target) && !menuBtn.contains(event.target)) {
+              closeMenu();
+            }
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") closeMenu();
+          });
+
+          if (menuCloseBtn) {
+            menuCloseBtn.addEventListener("click", closeMenu);
+          }
+        }
+
+        var newsletterForm = document.getElementById("newsletter-form");
+        var newsletterStatus = document.getElementById("newsletter-status");
+        if (newsletterForm && newsletterStatus) {
+          newsletterForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            newsletterStatus.textContent = "Submitting...";
+
+            try {
+              var formData = new FormData(newsletterForm);
+              var response = await fetch(newsletterForm.action, {
+                method: "POST",
+                body: formData,
+                headers: { Accept: "application/json" }
+              });
+
+              if (response.ok) {
+                newsletterStatus.textContent = "Thanks, you are subscribed for news and book discoveries.";
+                newsletterForm.reset();
+              } else {
+                newsletterStatus.textContent = "Something went wrong. Please try again.";
+              }
+            } catch (error) {
+              newsletterStatus.textContent = "Network error. Please try again.";
+            }
+          });
+        }
+
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dave - Proposals</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="poster">
+      <header class="poster-head">
+        <div class="poster-head__title-line">
+          <h1 class="poster-title">dave</h1>
+          <div class="poster-head__actions">
+            <button
+              class="poster-menu-btn"
+              type="button"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-controls="site-menu"
+            >
+              &#9776;
+            </button>
+          </div>
+        </div>
+        <nav class="poster-menu" id="site-menu" aria-label="Main menu">
+          <button class="poster-menu-close-btn" type="button" aria-label="Close menu">&times;</button>
+          <a href="home.html" class="poster-menu__item">Home</a>
+          <a href="index.html" class="poster-menu__item">News</a>
+          <a href="sessions.html" class="poster-menu__item">Sessions</a>
+          <a href="notes.html" class="poster-menu__item">Notes</a>
+          <a href="proposals.html" class="poster-menu__item is-active" aria-current="page">Proposals</a>
+          <a href="bookshelf.html" class="poster-menu__item">Bookshelf</a>
+        </nav>
+      </header>
+
+      <section class="vote-board" aria-label="Book proposals and voting">
+        <form class="vote-form" id="proposal-form">
+          <label class="poster-write-label" for="proposal-title">Book Title</label>
+          <input id="proposal-title" class="vote-input" type="text" placeholder="e.g. The Left Hand of Darkness" required />
+
+          <label class="poster-write-label" for="proposal-author">Author</label>
+          <input id="proposal-author" class="vote-input" type="text" placeholder="e.g. Ursula K. Le Guin" required />
+
+          <button type="submit" class="vote-btn vote-btn--primary">Add Proposal</button>
+        </form>
+
+        <div class="vote-list-wrap">
+          <p class="vote-list-title">Current Votes</p>
+          <ul id="proposal-list" class="vote-list"></ul>
+        </div>
+      </section>
+
+    </div>
+    <script>
+      (function () {
+        var menuBtn = document.querySelector(".poster-menu-btn");
+        var menu = document.getElementById("site-menu");
+        var menuCloseBtn = menu ? menu.querySelector(".poster-menu-close-btn") : null;
+        if (menuBtn && menu) {
+          function closeMenu() {
+            menu.classList.remove("is-open");
+            menuBtn.setAttribute("aria-expanded", "false");
+          }
+
+          menuBtn.addEventListener("click", function () {
+            var willOpen = !menu.classList.contains("is-open");
+            menu.classList.toggle("is-open", willOpen);
+            menuBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+          });
+
+          document.addEventListener("click", function (event) {
+            if (!menu.contains(event.target) && !menuBtn.contains(event.target)) {
+              closeMenu();
+            }
+          });
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") closeMenu();
+          });
+
+          if (menuCloseBtn) {
+            menuCloseBtn.addEventListener("click", closeMenu);
+          }
+        }
+
+        var STORAGE_KEY = "dave-book-proposals";
+        var form = document.getElementById("proposal-form");
+        var list = document.getElementById("proposal-list");
+        var titleInput = document.getElementById("proposal-title");
+        var authorInput = document.getElementById("proposal-author");
+
+        function readProposals() {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return [];
+            var parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function saveProposals(items) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+          } catch (e) {}
+        }
+
+        function render() {
+          var items = readProposals().sort(function (a, b) {
+            return b.votes - a.votes;
+          });
+          list.innerHTML = "";
+
+          if (!items.length) {
+            var empty = document.createElement("li");
+            empty.className = "vote-item vote-item--empty";
+            empty.textContent = "No proposals yet. Add the first one.";
+            list.appendChild(empty);
+            return;
+          }
+
+          items.forEach(function (item) {
+            var li = document.createElement("li");
+            li.className = "vote-item";
+
+            var text = document.createElement("p");
+            text.className = "vote-item__text";
+            text.textContent = item.title + " - " + item.author;
+
+            var meta = document.createElement("div");
+            meta.className = "vote-item__meta";
+
+            var count = document.createElement("span");
+            count.className = "vote-count";
+            count.textContent = item.votes + " vote" + (item.votes === 1 ? "" : "s");
+
+            var up = document.createElement("button");
+            up.type = "button";
+            up.className = "vote-btn";
+            up.textContent = "+1";
+            up.addEventListener("click", function () {
+              updateVotes(item.id, 1);
+            });
+
+            var down = document.createElement("button");
+            down.type = "button";
+            down.className = "vote-btn";
+            down.textContent = "-1";
+            down.addEventListener("click", function () {
+              updateVotes(item.id, -1);
+            });
+
+            var remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "vote-btn";
+            remove.textContent = "Remove";
+            remove.addEventListener("click", function () {
+              removeProposal(item.id);
+            });
+
+            meta.appendChild(count);
+            meta.appendChild(up);
+            meta.appendChild(down);
+            meta.appendChild(remove);
+            li.appendChild(text);
+            li.appendChild(meta);
+            list.appendChild(li);
+          });
+        }
+
+        function updateVotes(id, delta) {
+          var items = readProposals();
+          var next = items.map(function (item) {
+            if (item.id !== id) return item;
+            var votes = item.votes + delta;
+            return {
+              id: item.id,
+              title: item.title,
+              author: item.author,
+              votes: votes < 0 ? 0 : votes
+            };
+          });
+          saveProposals(next);
+          render();
+        }
+
+        function removeProposal(id) {
+          var items = readProposals().filter(function (item) {
+            return item.id !== id;
+          });
+          saveProposals(items);
+          render();
+        }
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          var title = titleInput.value.trim();
+          var author = authorInput.value.trim();
+          if (!title || !author) return;
+
+          var items = readProposals();
+          items.push({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            title: title,
+            author: author,
+            votes: 0
+          });
+          saveProposals(items);
+          form.reset();
+          titleInput.focus();
+          render();
+        });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>
