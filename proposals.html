@@ -152,18 +152,9 @@
               updateVotes(item.id, -1);
             });
 
-            var remove = document.createElement("button");
-            remove.type = "button";
-            remove.className = "vote-btn";
-            remove.textContent = "Remove";
-            remove.addEventListener("click", function () {
-              removeProposal(item.id);
-            });
-
             meta.appendChild(count);
             meta.appendChild(up);
             meta.appendChild(down);
-            meta.appendChild(remove);
             li.appendChild(text);
             li.appendChild(meta);
             list.appendChild(li);
@@ -183,14 +174,6 @@
             };
           });
           saveProposals(next);
-          render();
-        }
-
-        function removeProposal(id) {
-          var items = readProposals().filter(function (item) {
-            return item.id !== id;
-          });
-          saveProposals(items);
           render();
         }
 
