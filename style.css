@@ -299,7 +299,7 @@ body:has(.home-main) .poster-head {
   }
 }
 
-/* —— Notes: same 4+4+4 as header —— */
+/* —— Notebook: same 4+4+4 as header —— */
 .poster-write {
   grid-column: 1 / -1;
   display: grid;
@@ -619,7 +619,8 @@ body:has(.home-main) .poster-head {
   gap: 0.45rem;
 }
 
-.vote-input {
+.vote-input,
+.vote-textarea {
   width: 100%;
   margin: 0;
   padding: 0.55rem 0.6rem;
@@ -629,6 +630,12 @@ body:has(.home-main) .poster-head {
   background: transparent;
   border: var(--line) solid var(--ink);
   border-radius: 0;
+}
+
+.vote-textarea {
+  resize: vertical;
+  min-height: 5.5rem;
+  line-height: 1.35;
 }
 
 .vote-list-wrap {
@@ -652,11 +659,28 @@ body:has(.home-main) .poster-head {
 
 .vote-item {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  border-bottom: var(--line) solid var(--ink);
+}
+
+.vote-item__main {
+  display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0.6rem;
   padding: 0.55rem 0.6rem;
-  border-bottom: var(--line) solid var(--ink);
+}
+
+.vote-item__description {
+  margin: 0;
+  padding: 0.55rem 0.65rem 0.65rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 .vote-item:last-child {
@@ -705,6 +729,10 @@ body:has(.home-main) .poster-head {
 .vote-btn:hover,
 .vote-btn:focus-visible {
   background: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+.vote-btn--active {
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
 }
 
 /* —— Bookshelf: visual cover library —— */

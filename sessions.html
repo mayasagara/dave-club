@@ -30,7 +30,7 @@
           <a href="home.html" class="poster-menu__item">Home</a>
           <a href="index.html" class="poster-menu__item">News</a>
           <a href="sessions.html" class="poster-menu__item is-active" aria-current="page">Sessions</a>
-          <a href="notes.html" class="poster-menu__item">Notes</a>
+          <a href="notes.html" class="poster-menu__item">Notebook</a>
           <a href="proposals.html" class="poster-menu__item">Proposals</a>
           <a href="bookshelf.html" class="poster-menu__item">Bookshelf</a>
         </nav>
@@ -40,10 +40,6 @@
         <div class="poster-write-cell">
           <label class="poster-write-label" for="session-col-1">Agenda</label>
           <textarea id="session-col-1" class="poster-textarea" rows="12"></textarea>
-        </div>
-        <div class="poster-write-cell">
-          <label class="poster-write-label" for="session-col-2">Quotes</label>
-          <textarea id="session-col-2" class="poster-textarea" rows="12"></textarea>
         </div>
         <div class="poster-write-cell">
           <label class="poster-write-label" for="session-col-3">Decisions</label>
@@ -87,7 +83,7 @@
         var SUPABASE_URL = "https://bodzlwbeslynaqxamgpp.supabase.co";
         var SUPABASE_KEY = "sb_publishable_VWvuyM_-txwgj-jFTg_b6A_MB1yJI4y";
         var PAGE_KEY = "sessions";
-        var ids = ["session-col-1", "session-col-2", "session-col-3"];
+        var ids = ["session-col-1", "session-col-3"];
         var saveTimers = {};
         var textareas = {};
         var lastSaved = {};

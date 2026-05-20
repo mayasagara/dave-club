@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>dave - Notes</title>
+    <title>dave - Notebook</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -30,15 +30,15 @@
           <a href="home.html" class="poster-menu__item">Home</a>
           <a href="index.html" class="poster-menu__item">News</a>
           <a href="sessions.html" class="poster-menu__item">Sessions</a>
-          <a href="notes.html" class="poster-menu__item is-active" aria-current="page">Notes</a>
+          <a href="notes.html" class="poster-menu__item is-active" aria-current="page">Notebook</a>
           <a href="proposals.html" class="poster-menu__item">Proposals</a>
           <a href="bookshelf.html" class="poster-menu__item">Bookshelf</a>
         </nav>
       </header>
 
-      <section class="poster-write" aria-label="Notes columns">
+      <section class="poster-write" aria-label="Notebook columns">
         <div class="poster-write-cell">
-          <label class="poster-write-label" for="notes-col-1">Draft</label>
+          <label class="poster-write-label" for="notes-col-1">Quotes</label>
           <textarea id="notes-col-1" class="poster-textarea" rows="12"></textarea>
         </div>
         <div class="poster-write-cell">
@@ -86,8 +86,12 @@
 
         var SUPABASE_URL = "https://bodzlwbeslynaqxamgpp.supabase.co";
         var SUPABASE_KEY = "sb_publishable_VWvuyM_-txwgj-jFTg_b6A_MB1yJI4y";
-        var PAGE_KEY = "notes";
         var ids = ["notes-col-1", "notes-col-2", "notes-col-3"];
+        var slotConfig = {
+          "notes-col-1": { page: "sessions", slot: "session-col-2" },
+          "notes-col-2": { page: "notes", slot: "notes-col-2" },
+          "notes-col-3": { page: "notes", slot: "notes-col-3" }
+        };
         var saveTimers = {};
         var textareas = {};
         var lastSaved = {};
@@ -113,8 +117,9 @@
           });
         }
 
-        function saveSlot(slot, value) {
-          var payload = [{ page: PAGE_KEY, slot: slot, content: value }];
+        function saveSlot(elementId, value) {
+          var cfg = slotConfig[elementId];
+          var payload = [{ page: cfg.page, slot: cfg.slot, content: value }];
           return apiRequest("/rest/v1/page_notes?on_conflict=page,slot", {
             method: "POST",
             headers: {
@@ -126,36 +131,51 @@
             body: JSON.stringify(payload)
           }).then(function (response) {
             if (!response.ok) return parseError(response, "Failed to save notes");
-            lastSaved[slot] = value;
+            lastSaved[elementId] = value;
           }).catch(function (error) {
             console.error(error && error.message ? error.message : error);
           });
         }
 
-        function queueSave(slot, value) {
-          if (saveTimers[slot]) {
-            clearTimeout(saveTimers[slot]);
+        function queueSave(elementId, value) {
+          if (saveTimers[elementId]) {
+            clearTimeout(saveTimers[elementId]);
           }
-          saveTimers[slot] = setTimeout(function () {
-            saveSlot(slot, value);
+          saveTimers[elementId] = setTimeout(function () {
+            saveSlot(elementId, value);
           }, 350);
         }
 
+        function rowsByPageSlot(rows) {
+          var map = {};
+          (rows || []).forEach(function (row) {
+            map[row.page + ":" + row.slot] = row.content || "";
+          });
+          return map;
+        }
+
         function loadNotes() {
-          return apiRequest("/rest/v1/page_notes?page=eq." + encodeURIComponent(PAGE_KEY) + "&select=slot,content", {
-            method: "GET"
-          }).then(function (response) {
-            if (!response.ok) return parseError(response, "Failed to load notes");
-            return response.json();
-          }).then(function (rows) {
-            var bySlot = {};
-            (rows || []).forEach(function (row) {
-              bySlot[row.slot] = row.content || "";
+          return Promise.all([
+            apiRequest("/rest/v1/page_notes?page=eq.notes&select=slot,content", { method: "GET" }),
+            apiRequest("/rest/v1/page_notes?page=eq.sessions&select=slot,content", { method: "GET" })
+          ]).then(function (responses) {
+            if (!responses[0].ok) return parseError(responses[0], "Failed to load notes");
+            if (!responses[1].ok) return parseError(responses[1], "Failed to load quotes");
+            return Promise.all([responses[0].json(), responses[1].json()]).then(function (payloads) {
+              var notesRows = payloads[0].map(function (row) {
+                return { page: "notes", slot: row.slot, content: row.content };
+              });
+              var sessionRows = payloads[1].map(function (row) {
+                return { page: "sessions", slot: row.slot, content: row.content };
+              });
+              return rowsByPageSlot(notesRows.concat(sessionRows));
             });
+          }).then(function (byKey) {
             ids.forEach(function (id) {
               var ta = textareas[id];
               if (!ta) return;
-              var next = bySlot[id] || "";
+              var cfg = slotConfig[id];
+              var next = byKey[cfg.page + ":" + cfg.slot] || "";
               if (document.activeElement !== ta && ta.value !== next) {
                 ta.value = next;
               }

@@ -30,7 +30,7 @@
           <a href="home.html" class="poster-menu__item">Home</a>
           <a href="index.html" class="poster-menu__item">News</a>
           <a href="sessions.html" class="poster-menu__item">Sessions</a>
-          <a href="notes.html" class="poster-menu__item">Notes</a>
+          <a href="notes.html" class="poster-menu__item">Notebook</a>
           <a href="proposals.html" class="poster-menu__item is-active" aria-current="page">Proposals</a>
           <a href="bookshelf.html" class="poster-menu__item">Bookshelf</a>
         </nav>
@@ -43,6 +43,14 @@
 
           <label class="poster-write-label" for="proposal-author">Author</label>
           <input id="proposal-author" class="vote-input" type="text" placeholder="e.g. Ursula K. Le Guin" required />
+
+          <label class="poster-write-label" for="proposal-description">Description</label>
+          <textarea
+            id="proposal-description"
+            class="vote-textarea"
+            rows="4"
+            placeholder="Why propose this book? Plot, themes, or why the club should read it."
+          ></textarea>
 
           <button type="submit" class="vote-btn vote-btn--primary">Add Proposal</button>
         </form>
@@ -90,6 +98,7 @@
         var list = document.getElementById("proposal-list");
         var titleInput = document.getElementById("proposal-title");
         var authorInput = document.getElementById("proposal-author");
+        var descriptionInput = document.getElementById("proposal-description");
         var SUPABASE_URL = "https://bodzlwbeslynaqxamgpp.supabase.co";
         var SUPABASE_KEY = "sb_publishable_VWvuyM_-txwgj-jFTg_b6A_MB1yJI4y";
         var proposals = [];
@@ -126,7 +135,7 @@
         }
 
         function loadProposals() {
-          return apiRequest("/rest/v1/proposals?select=id,title,author,votes,created_at&order=votes.desc,created_at.asc", {
+          return apiRequest("/rest/v1/proposals?select=id,title,author,description,votes,created_at&order=votes.desc,created_at.asc", {
             method: "GET"
           }).then(function (response) {
             if (!response.ok) return parseError(response, "Failed to load proposals");
@@ -139,7 +148,7 @@
           });
         }
 
-        function addProposal(title, author) {
+        function addProposal(title, author, description) {
           return apiRequest("/rest/v1/proposals", {
             method: "POST",
             headers: {
@@ -148,7 +157,7 @@
               "Content-Type": "application/json",
               Prefer: "return=representation"
             },
-            body: JSON.stringify([{ title: title, author: author, votes: 0 }])
+            body: JSON.stringify([{ title: title, author: author, description: description, votes: 0 }])
           }).then(function (response) {
             if (!response.ok) return parseError(response, "Failed to save proposal");
             return response.json();
@@ -205,6 +214,9 @@
             var li = document.createElement("li");
             li.className = "vote-item";
 
+            var main = document.createElement("div");
+            main.className = "vote-item__main";
+
             var text = document.createElement("p");
             text.className = "vote-item__text";
             text.textContent = item.title + " - " + item.author;
@@ -215,6 +227,27 @@
             var count = document.createElement("span");
             count.className = "vote-count";
             count.textContent = item.votes + " vote" + (item.votes === 1 ? "" : "s");
+
+            var descBtn = document.createElement("button");
+            descBtn.type = "button";
+            descBtn.className = "vote-btn";
+            descBtn.textContent = "Description";
+            descBtn.setAttribute("aria-expanded", "false");
+            descBtn.setAttribute("aria-controls", "proposal-desc-" + item.id);
+
+            var descriptionText = (item.description || "").trim();
+            var descPanel = document.createElement("div");
+            descPanel.className = "vote-item__description";
+            descPanel.id = "proposal-desc-" + item.id;
+            descPanel.hidden = true;
+            descPanel.textContent = descriptionText || "No description provided.";
+
+            descBtn.addEventListener("click", function () {
+              var isOpen = !descPanel.hidden;
+              descPanel.hidden = isOpen;
+              descBtn.setAttribute("aria-expanded", isOpen ? "false" : "true");
+              descBtn.classList.toggle("vote-btn--active", !isOpen);
+            });
 
             var up = document.createElement("button");
             up.type = "button";
@@ -241,11 +274,14 @@
             });
 
             meta.appendChild(count);
+            meta.appendChild(descBtn);
             meta.appendChild(up);
             meta.appendChild(down);
             meta.appendChild(remove);
-            li.appendChild(text);
-            li.appendChild(meta);
+            main.appendChild(text);
+            main.appendChild(meta);
+            li.appendChild(main);
+            li.appendChild(descPanel);
             list.appendChild(li);
           });
         }
@@ -282,9 +318,10 @@
           event.preventDefault();
           var title = titleInput.value.trim();
           var author = authorInput.value.trim();
+          var description = descriptionInput.value.trim();
           if (!title || !author) return;
 
-          addProposal(title, author).then(function () {
+          addProposal(title, author, description).then(function () {
             form.reset();
             titleInput.focus();
           }).catch(function (error) {
