@@ -617,6 +617,12 @@ body:has(.home-main) .poster-head {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  font-size: var(--text);
+  line-height: var(--text-lead);
+}
+
+.vote-form .poster-write-label {
+  font-size: var(--text);
 }
 
 .vote-input,
@@ -624,8 +630,9 @@ body:has(.home-main) .poster-head {
   width: 100%;
   margin: 0;
   padding: 0.55rem 0.6rem;
-  font: inherit;
-  font-size: inherit;
+  font-family: inherit;
+  font-size: var(--text);
+  line-height: var(--text-lead);
   color: var(--ink);
   background: transparent;
   border: var(--line) solid var(--ink);
@@ -634,8 +641,14 @@ body:has(.home-main) .poster-head {
 
 .vote-textarea {
   resize: vertical;
-  min-height: 5.5rem;
-  line-height: 1.35;
+  min-height: 6.5rem;
+}
+
+.vote-input::placeholder,
+.vote-textarea::placeholder {
+  font-size: var(--text);
+  line-height: var(--text-lead);
+  opacity: 0.55;
 }
 
 .vote-list-wrap {
