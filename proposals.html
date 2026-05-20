@@ -102,6 +102,7 @@
         var SUPABASE_URL = "https://bodzlwbeslynaqxamgpp.supabase.co";
         var SUPABASE_KEY = "sb_publishable_VWvuyM_-txwgj-jFTg_b6A_MB1yJI4y";
         var proposals = [];
+        var openDescriptionIds = {};
 
         function apiRequest(path, options) {
           return fetch(SUPABASE_URL + path, Object.assign({
@@ -200,6 +201,15 @@
           } catch (e) {
             // Keep default order if date parsing fails.
           }
+
+          var validIds = {};
+          proposals.forEach(function (proposal) {
+            validIds[proposal.id] = true;
+          });
+          Object.keys(openDescriptionIds).forEach(function (id) {
+            if (!validIds[id]) delete openDescriptionIds[id];
+          });
+
           list.innerHTML = "";
 
           if (!proposals.length) {
@@ -242,11 +252,22 @@
             descPanel.hidden = true;
             descPanel.textContent = descriptionText || "No description provided.";
 
+            if (openDescriptionIds[item.id]) {
+              descPanel.hidden = false;
+              descBtn.setAttribute("aria-expanded", "true");
+              descBtn.classList.add("vote-btn--active");
+            }
+
             descBtn.addEventListener("click", function () {
               var isOpen = !descPanel.hidden;
               descPanel.hidden = isOpen;
               descBtn.setAttribute("aria-expanded", isOpen ? "false" : "true");
               descBtn.classList.toggle("vote-btn--active", !isOpen);
+              if (isOpen) {
+                delete openDescriptionIds[item.id];
+              } else {
+                openDescriptionIds[item.id] = true;
+              }
             });
 
             var up = document.createElement("button");
@@ -298,6 +319,8 @@
         function removeProposal(id, title) {
           var ok = window.confirm('Delete "' + title + '"?');
           if (!ok) return;
+
+          delete openDescriptionIds[id];
 
           apiRequest("/rest/v1/proposals?id=eq." + encodeURIComponent(id), {
             method: "DELETE",
