@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>dave - Proposals</title>
-    <link rel="stylesheet" href="style.css?v=3" />
+    <link rel="stylesheet" href="style.css?v=4" />
   </head>
   <body>
     <div class="poster">
@@ -104,6 +104,23 @@
         var proposals = [];
         var openDescriptionIds = {};
 
+        function proposalId(item) {
+          return String(item.id);
+        }
+
+        function isDescriptionOpen(id) {
+          return !!openDescriptionIds[String(id)];
+        }
+
+        function setDescriptionOpen(id, open) {
+          var key = String(id);
+          if (open) {
+            openDescriptionIds[key] = true;
+          } else {
+            delete openDescriptionIds[key];
+          }
+        }
+
         function apiRequest(path, options) {
           return fetch(SUPABASE_URL + path, Object.assign({
             headers: {
@@ -142,8 +159,14 @@
             if (!response.ok) return parseError(response, "Failed to load proposals");
             return response.json();
           }).then(function (items) {
-            proposals = Array.isArray(items) ? items : [];
-            render();
+            var next = Array.isArray(items) ? items : [];
+            if (canSoftUpdate(proposals, next)) {
+              proposals = next;
+              softRender();
+            } else {
+              proposals = next;
+              render();
+            }
           }).catch(function (error) {
             renderError(error && error.message ? error.message : "Could not load proposals.");
           });
@@ -184,13 +207,30 @@
         }
 
         function findProposal(id) {
+          var key = String(id);
           for (var i = 0; i < proposals.length; i += 1) {
-            if (proposals[i].id === id) return proposals[i];
+            if (proposalId(proposals[i]) === key) return proposals[i];
           }
           return null;
         }
 
-        function render() {
+        function canSoftUpdate(prev, next) {
+          if (prev.length !== next.length) return false;
+          var prevById = {};
+          prev.forEach(function (item) {
+            prevById[proposalId(item)] = item;
+          });
+          for (var i = 0; i < next.length; i += 1) {
+            var item = next[i];
+            var old = prevById[proposalId(item)];
+            if (!old) return false;
+            if (old.title !== item.title || old.author !== item.author) return false;
+            if ((old.description || "") !== (item.description || "")) return false;
+          }
+          return true;
+        }
+
+        function sortProposals() {
           try {
             proposals.sort(function (a, b) {
               if (b.votes !== a.votes) return b.votes - a.votes;
@@ -201,10 +241,39 @@
           } catch (e) {
             // Keep default order if date parsing fails.
           }
+        }
+
+        function softRender() {
+          sortProposals();
+          var liById = {};
+          list.querySelectorAll(".vote-item").forEach(function (li) {
+            var panel = li.querySelector(".vote-item__description");
+            if (!panel || !panel.id) return;
+            liById[panel.id.replace("proposal-desc-", "")] = li;
+          });
+          proposals.forEach(function (item) {
+            var id = proposalId(item);
+            var li = liById[id];
+            if (!li) return;
+            var count = li.querySelector(".vote-count");
+            if (count) {
+              count.textContent = item.votes + " vote" + (item.votes === 1 ? "" : "s");
+            }
+            var panel = li.querySelector(".vote-item__description");
+            if (panel) {
+              var descriptionText = (item.description || "").trim();
+              panel.textContent = descriptionText || "No description provided.";
+            }
+            list.appendChild(li);
+          });
+        }
+
+        function render() {
+          sortProposals();
 
           var validIds = {};
           proposals.forEach(function (proposal) {
-            validIds[proposal.id] = true;
+            validIds[proposalId(proposal)] = true;
           });
           Object.keys(openDescriptionIds).forEach(function (id) {
             if (!validIds[id]) delete openDescriptionIds[id];
@@ -243,31 +312,27 @@
             descBtn.className = "vote-btn";
             descBtn.textContent = "Description";
             descBtn.setAttribute("aria-expanded", "false");
-            descBtn.setAttribute("aria-controls", "proposal-desc-" + item.id);
+            var id = proposalId(item);
+            descBtn.setAttribute("aria-controls", "proposal-desc-" + id);
 
             var descriptionText = (item.description || "").trim();
             var descPanel = document.createElement("div");
             descPanel.className = "vote-item__description";
-            descPanel.id = "proposal-desc-" + item.id;
-            descPanel.hidden = true;
+            descPanel.id = "proposal-desc-" + id;
             descPanel.textContent = descriptionText || "No description provided.";
 
-            if (openDescriptionIds[item.id]) {
-              descPanel.hidden = false;
+            if (isDescriptionOpen(id)) {
+              descPanel.classList.add("is-open");
               descBtn.setAttribute("aria-expanded", "true");
               descBtn.classList.add("vote-btn--active");
             }
 
             descBtn.addEventListener("click", function () {
-              var isOpen = !descPanel.hidden;
-              descPanel.hidden = isOpen;
-              descBtn.setAttribute("aria-expanded", isOpen ? "false" : "true");
-              descBtn.classList.toggle("vote-btn--active", !isOpen);
-              if (isOpen) {
-                delete openDescriptionIds[item.id];
-              } else {
-                openDescriptionIds[item.id] = true;
-              }
+              var willOpen = !descPanel.classList.contains("is-open");
+              descPanel.classList.toggle("is-open", willOpen);
+              descBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+              descBtn.classList.toggle("vote-btn--active", willOpen);
+              setDescriptionOpen(id, willOpen);
             });
 
             var up = document.createElement("button");
@@ -320,7 +385,7 @@
           var ok = window.confirm('Delete "' + title + '"?');
           if (!ok) return;
 
-          delete openDescriptionIds[id];
+          setDescriptionOpen(id, false);
 
           apiRequest("/rest/v1/proposals?id=eq." + encodeURIComponent(id), {
             method: "DELETE",
@@ -353,7 +418,6 @@
         });
 
         loadProposals();
-        setInterval(loadProposals, 5000);
         window.addEventListener("focus", loadProposals);
         document.addEventListener("visibilitychange", function () {
           if (!document.hidden) loadProposals();

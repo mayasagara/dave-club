@@ -688,12 +688,17 @@ body:has(.home-main) .poster-head {
 }
 
 .vote-item__description {
+  display: none;
   margin: 0;
   padding: 0.55rem 0.65rem 0.65rem;
   border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
   line-height: 1.4;
   white-space: pre-wrap;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.vote-item__description.is-open {
+  display: block;
 }
 
 .vote-item:last-child {
