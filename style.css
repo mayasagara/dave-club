@@ -69,9 +69,6 @@ body.home-page {
     max(var(--page-pad), env(safe-area-inset-left, 0px));
 }
 
-.home-page .poster-title {
-  display: none;
-}
 
 /* —— Master grid (all sections share these 12 tracks) —— */
 .poster {
@@ -113,11 +110,14 @@ body.home-page {
 
 .poster-title {
   margin: 0;
-  font-size: clamp(2.85rem, 7.5vw, 5.5rem);
-  font-weight: 700;
-  line-height: 0.98;
-  letter-spacing: -0.03em;
   min-width: 0;
+  line-height: 0;
+}
+
+.poster-logo {
+  display: block;
+  height: clamp(2rem, 5.5vw, 3.25rem);
+  width: auto;
 }
 
 /* Same type as title; sits on title line, right edge */

@@ -10,7 +10,9 @@
     <div class="poster">
       <header class="poster-head">
         <div class="poster-head__title-line">
-          <h1 class="poster-title">dave</h1>
+          <h1 class="poster-title">
+            <img class="poster-logo" src="logo.svg" alt="dave" width="239" height="88" />
+          </h1>
           <div class="poster-head__actions">
             <button
               class="poster-menu-btn"
@@ -88,40 +90,11 @@
         var readEl = document.getElementById("bookshelf-read");
         var readingSeed = [
           {
-            title: "yet to come",
+            title: "",
             author: "",
-            tone: "d",
-            placeholder: true
+            cover: "books/proposed/7b848403edd9eb8c73219277f4a5c0f5.jpg"
           }
         ];
-        var featuredBooks = [
-          {
-            title: "Mythologies",
-            author: "Roland Barthes",
-            cover: "books/read/9782021034479-fr.jpg"
-          },
-          {
-            title: "Une chambre a soi",
-            author: "Virginia Woolf",
-            cover: "books/read/71MQI9QP21L._UF1000,1000_QL80_.jpg"
-          },
-          {
-            title: "L'amant",
-            author: "Marguerite Duras",
-            cover: "books/read/816J5uJcXQL._AC_UF1000,1000_QL80_.jpg"
-          }
-        ];
-        var extraReadCovers = [
-          "books/read/04c1b07b1688d69a296086ed876a2c1d.jpg",
-          "books/read/5c0c97d55f1f8d17dba2d3edde7d00e9.jpg",
-          "books/read/8d2bfb92e15aa64903f6d1f06e264fb4.jpg",
-          "books/read/884b0181884e1cae20b0b5412f2966ff.jpg",
-          "books/read/5274705b4ae5fb88fe27c41ce8c58e9b.jpg",
-          "books/read/d56183dd3e2686ab618eafbfe86d2332.jpg",
-          "books/read/e8376a9d4f59df61bc31f4967bc07f0e.jpg",
-          "books/read/f41d0958a7c710740091e8a5bc5cd341.jpg"
-        ];
-
         function makeBook(book, idx) {
           var li = document.createElement("li");
           li.className = "shelf-book";
@@ -164,22 +137,37 @@
         }
 
         var proposedCovers = [
-          "books/proposed/095f6e493886b20f1bcd639215f0ec23.jpg",
-          "books/proposed/1684f6ac3138fe5eeb678b3d9dacd0b2.jpg",
-          "books/proposed/32072f1364472eea42a703a9feccb641.jpg",
-          "books/proposed/5194e917ea369027d9b35060dd48e8bd.jpg",
-          "books/proposed/5a1a805e8d9487cb2e87ff9b713c315f.jpg",
-          "books/proposed/64e9350b99ceeb06aea7caac4319f9b6.jpg",
-          "books/proposed/6aa6ba89164cffd0e5e1144b7224f499.jpg",
-          "books/proposed/6e570d1d09a8254431ae5a244c70cb62.jpg",
-          "books/proposed/716cfa3c5b17a18c83a5ee77eb536b69.jpg",
-          "books/proposed/a81125cacfd59651bd74246a6b5c45ed.jpg",
-          "books/proposed/b05286f2a7d6cf34042732fa2e1645dd.jpg",
-          "books/proposed/b5657c5fd43cfbc6d09d91f7d24409f8.jpg",
-          "books/proposed/d0e51e11a81459c1d3afd8e0fee23e8e.jpg",
-          "books/proposed/d9ef0d3700b9d56673a5239498026fa8.jpg",
-          "books/proposed/e4ff40b5265708f74653a9a86ac805f2.jpg",
-          "books/proposed/fea4becbf3dc87e42fa8231368546576.jpg"
+          "books/proposed/1a1b6f5953ac78f0f7f2a86a95764e78.jpg",
+          "books/proposed/1c50a1137d569e3ff21c4a95b4c23768.jpg",
+          "books/proposed/20d2651e747d88fc71dce3647e06a463.jpg",
+          "books/proposed/322b0b72084c5c40fe9d69e48d7f96b9.jpg",
+          "books/proposed/3d2ecdd3b167e124c216a25d085c655c.jpg",
+          "books/proposed/465d01a2760c0fd1fac79bf09590699e.jpg",
+          "books/proposed/47f75c0c9eb061d14abf96743da47897.jpg",
+          "books/proposed/49f8b5ef3c9ba917e080668929da6c37.jpg",
+          "books/proposed/4bbe8c743057e712a2243339981d0569.jpg",
+          "books/proposed/57f3c8e26f7841e92acba841eec6c9c1.jpg",
+          "books/proposed/5bec1abfbbcf931c57ea54153e2e1ee6.jpg",
+          "books/proposed/61m2XYRVFRL._AC_UF894,1000_QL80_.jpg",
+          "books/proposed/6943cd18d4fe3c4cb16a03a17024ac24.jpg",
+          "books/proposed/6c5ecf9cfc2e280184131d99f9e72582.jpg",
+          "books/proposed/6ea53525e038462d0c87ba6c799796b3.jpg",
+          "books/proposed/73abe4ca9cb595671af2973ea478bb49.jpg",
+          "books/proposed/79d19a1786ad8883c4d911fe31f25517.jpg",
+          "books/proposed/93b86c8a786926a7574a709a803f0550.jpg",
+          "books/proposed/99189369427bb67624872abcfbeab279.jpg",
+          "books/proposed/9c2288e60ff20fd91eb342a57d514a2e.jpg",
+          "books/proposed/abafe4c0c8c86262fb73c2cbff616dc1.jpg",
+          "books/proposed/b423c49032838f2627b3b45b5f4b7605.jpg",
+          "books/proposed/bde6a6e1794314eb102e058482ce5109.jpg",
+          "books/proposed/be637e13f995a037ddadde351a82e6f7.jpg",
+          "books/proposed/c03e253494f73ddfec173d9f2fd23373.jpg",
+          "books/proposed/c61f40ac9df8167960ee721c54facdaa.jpg",
+          "books/proposed/d0b6a0ef299702e3046b1854b073bf9f.jpg",
+          "books/proposed/d7393c82d3d0c691f2ed8cb63988b3ea.jpg",
+          "books/proposed/e85f467a3afdfeaac9d2fd03e401f5cf.jpg",
+          "books/proposed/e9f59c83c3d41d3ed437bf77d1cbeb12.jpg",
+          "books/proposed/f2d2a80670f84dd56e509fee28d67820.jpg"
         ];
         var proposedBooks = proposedCovers.map(function (coverPath, idx) {
           return {
@@ -188,15 +176,7 @@
             cover: coverPath
           };
         });
-        var readBooks = featuredBooks.concat(
-          extraReadCovers.map(function (coverPath, idx) {
-            return {
-              title: "Read Book " + (idx + 4),
-              author: "",
-              cover: coverPath
-            };
-          })
-        );
+        var readBooks = [];
 
         renderLane(readingEl, readingSeed);
         renderLane(proposedEl, proposedBooks);
